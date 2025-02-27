@@ -5,5 +5,5 @@ data class BulletPair(
     val y:Float,
     val topHeight:Float,
     val bottomHeight:Float,
-    val score :Boolean = false
+    var score :Boolean = false
 )
