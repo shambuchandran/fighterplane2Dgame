@@ -15,13 +15,13 @@ data class Game(
     val platform: Platform,
     val screenWidth:Int = 0,
     val screenHeight:Int = 0,
-    val gravity:Float = 0.5f,
-    val size:Float = 30f,
-    val jetImpulse:Float = -10f,
-    val jetMaxVelocity:Float = if (platform == Platform.Android)25f else 10f,
-    val bulletWidth: Float = 150f,
-    val bulletSpeed:Float = if (platform == Platform.Android)5f else 2.5f,
-    val bulletGapSpace :Float = if (platform == Platform.Android)250f else 300f
+    val gravity:Float = if (platform == Platform.Android) 0.6f else if (platform == Platform.Ios) 0.6f else 0.25f,
+    val size:Float = 27f,
+    val jetImpulse:Float =  if (platform == Platform.Android) -10f else if (platform == Platform.Ios) -10f else -8f,
+    val jetMaxVelocity:Float = if (platform == Platform.Android) 25f else if(platform == Platform.Ios) 20f else 20f,
+    val bulletWidth: Float = 110f,
+    val bulletSpeed:Float = if (platform == Platform.Android) 5f else if(platform == Platform.Ios) 7f else 4f,
+    val bulletGapSpace :Float = if (platform == Platform.Android)360f else 330f
 ): KoinComponent {
 
     private val audioPlayer :AudioPlayer by inject()
@@ -32,7 +32,7 @@ data class Game(
         private set
     var fighterJet by mutableStateOf(
         FighterJet(
-            x = (screenWidth/6).toFloat(),
+            x = (screenWidth/8).toFloat(),
             y = (screenHeight/2).toFloat(),
             size = size
         )
@@ -64,7 +64,7 @@ data class Game(
         status = GameStatus.Started
         audioPlayer.playGameSoundInLoop()
     }
-    fun gameOver(){
+    private fun gameOver(){
         status = GameStatus.Over
         audioPlayer.stopGameSound()
         saveScore()
@@ -103,7 +103,7 @@ data class Game(
     }
     fun updateGameProgress(){
         bulletPairs.forEach { bulletPair ->
-            if (isCollision(bulletPair)){
+            if (isCollision(bulletPair = bulletPair)){
                 gameOver()
                 return
             }
@@ -129,20 +129,19 @@ data class Game(
                  isFallingSoundPlayer = true
             }
         }
-
         addNewBullets()
     }
 
     private fun isCollision(bulletPair: BulletPair):Boolean{
         //horizontal collision
         val fighterJetRightEdge = fighterJet.x + fighterJet.size
-        val fighterJetLeftEdge = fighterJet.y + fighterJet.size
+        val fighterJetLeftEdge = fighterJet.x - fighterJet.size
         val bulletRightEdge = bulletPair.x + bulletWidth/2
-        val bulletLeftEdge = bulletPair.x + bulletWidth/2
+        val bulletLeftEdge = bulletPair.x - bulletWidth/2
         val horizontalCollision = fighterJetRightEdge > bulletLeftEdge && fighterJetLeftEdge < bulletRightEdge
 
         //gap collision
-        val fighterJetTopEdge = fighterJet.y + fighterJet.size
+        val fighterJetTopEdge = fighterJet.y - fighterJet.size
         val fighterJetBottomEdge = fighterJet.y + fighterJet.size
         val gapTopEdge = bulletPair.y - bulletGapSpace/2
         val gapBottomEdge = bulletPair.y + bulletGapSpace/2
@@ -160,7 +159,7 @@ data class Game(
         bulletPairs.forEach { it.x -= bulletSpeed }
         bulletPairs.removeAll{it.x + bulletWidth < 0}
         val isLandscape = screenWidth > screenHeight
-        val addThreshold = if (isLandscape) screenWidth /1.25 else screenWidth/2.0
+        val addThreshold = if (isLandscape) screenWidth /1.95 else screenWidth/2.75
         if (bulletPairs.isEmpty() || bulletPairs.last().x < addThreshold){
             val initialBulletX = screenWidth.toFloat() + bulletWidth
             val topHeight = Random.nextFloat()*(screenHeight/2)

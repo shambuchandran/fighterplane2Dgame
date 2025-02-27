@@ -8,7 +8,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,7 +43,6 @@ import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
@@ -70,14 +67,15 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import twodgamecmp.composeapp.generated.resources.Res
 import twodgamecmp.composeapp.generated.resources.background
-import twodgamecmp.composeapp.generated.resources.bullet
 import twodgamecmp.composeapp.generated.resources.movingbgn
-import twodgamecmp.composeapp.generated.resources.sprite_a
+import twodgamecmp.composeapp.generated.resources.pipe
+import twodgamecmp.composeapp.generated.resources.pipe_cap
+import twodgamecmp.composeapp.generated.resources.plane
 
 
-const val JET_WIDTH = 294
-const val JET_HEIGHT = 200
-const val BULLET_CAP = 50f
+const val JET_WIDTH = 117
+const val JET_HEIGHT = 80
+const val PIPE_CAP_HEIGHT = 50f
 
 @Composable
 @Preview
@@ -97,7 +95,7 @@ fun App() {
                 default = SpriteSheet(
                     frameWidth = JET_WIDTH,
                     frameHeight = JET_HEIGHT,
-                    image = Res.drawable.sprite_a
+                    image = Res.drawable.plane
                 )
             )
         }
@@ -105,7 +103,7 @@ fun App() {
         val sheetImage = spriteSpec.imageBitmap
         val animatedAngle by animateFloatAsState(
             targetValue = when {
-                game.jetVelocity > game.jetMaxVelocity / 1.1 -> 30f
+                game.jetVelocity > game.jetMaxVelocity / 1.1 -> 25f
                 else -> 0f
             }
         )
@@ -125,8 +123,8 @@ fun App() {
         val scope = rememberCoroutineScope()
         val backgroundOffsetX = remember { Animatable(0f) }
         var imageWidth by remember { mutableStateOf(0) }
-        val bulletImage = imageResource(Res.drawable.bullet)
-        val bulletCap = imageResource(Res.drawable.bullet)
+        val pipeImage = imageResource(Res.drawable.pipe)
+        val pipeCap = imageResource(Res.drawable.pipe_cap)
 
         LaunchedEffect(game.status) {
             while (game.status == GameStatus.Started) {
@@ -134,9 +132,9 @@ fun App() {
                     targetValue = -imageWidth.toFloat(),
                     animationSpec = infiniteRepeatable(
                         animation = tween(
-                            durationMillis = when(platform){
-                                Platform.Android -> 4000
-                                Platform.Ios -> 4000
+                            durationMillis = when (platform) {
+                                Platform.Android -> 4600
+                                Platform.Ios -> 4600
                                 Platform.Desktop -> 7000
                                 Platform.Web -> 8000
                             },
@@ -246,52 +244,53 @@ fun App() {
                     offset = IntOffset(
                         x = (game.fighterJet.x - game.size).toInt(),
                         y = (game.fighterJet.y - game.size).toInt()
+                    ),
+
                     )
-                )
             }
             game.bulletPairs.forEach { bulletPair ->
                 drawImage(
-                    image = bulletImage,
+                    image = pipeImage,
                     dstOffset = IntOffset(
-                        x = (bulletPair.x - (game.bulletWidth/2)).toInt(),
+                        x = (bulletPair.x - (game.bulletWidth / 2)).toInt(),
                         y = 0
                     ),
                     dstSize = IntSize(
                         width = game.bulletWidth.toInt(),
-                        height = (bulletPair.topHeight - BULLET_CAP).toInt()
+                        height = (bulletPair.topHeight - PIPE_CAP_HEIGHT).toInt()
                     )
                 )
                 drawImage(
-                    image = bulletImage,
+                    image = pipeCap,
                     dstOffset = IntOffset(
-                        x = (bulletPair.x - (game.bulletWidth/2)).toInt(),
-                        y = (bulletPair.topHeight - BULLET_CAP).toInt()
+                        x = (bulletPair.x - (game.bulletWidth / 2)).toInt(),
+                        y = (bulletPair.topHeight - PIPE_CAP_HEIGHT).toInt()
                     ),
                     dstSize = IntSize(
                         width = (game.bulletWidth).toInt(),
-                        height = BULLET_CAP.toInt()
+                        height = PIPE_CAP_HEIGHT.toInt()
                     )
                 )
                 drawImage(
-                    image = bulletImage,
+                    image = pipeImage,
                     dstOffset = IntOffset(
-                        x = (bulletPair.x - (game.bulletWidth/2)).toInt(),
-                        y = (bulletPair.y + game.bulletGapSpace/2).toInt()
+                        x = (bulletPair.x - (game.bulletWidth / 2)).toInt(),
+                        y = (bulletPair.y + game.bulletGapSpace / 2).toInt()
                     ),
                     dstSize = IntSize(
                         width = (game.bulletWidth).toInt(),
-                        height = BULLET_CAP.toInt()
+                        height = PIPE_CAP_HEIGHT.toInt()
                     )
                 )
                 drawImage(
-                    image = bulletImage,
+                    image = pipeCap,
                     dstOffset = IntOffset(
-                        x = (bulletPair.x - (game.bulletWidth/2)).toInt(),
-                        y = (bulletPair.y + (game.bulletGapSpace/2 + BULLET_CAP)).toInt()
+                        x = (bulletPair.x - (game.bulletWidth / 2)).toInt(),
+                        y = (bulletPair.y + (game.bulletGapSpace / 2 + PIPE_CAP_HEIGHT)).toInt()
                     ),
                     dstSize = IntSize(
                         width = game.bulletWidth.toInt(),
-                        height = (bulletPair.bottomHeight - BULLET_CAP).toInt()
+                        height = (bulletPair.bottomHeight - PIPE_CAP_HEIGHT).toInt()
                     )
                 )
 
@@ -347,7 +346,10 @@ fun App() {
                 Button(
                     modifier = Modifier.height(54.dp),
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(contentColor = Color.Blue),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.Yellow,
+                        containerColor = Color.Gray.copy(0.5f)
+                    ),
                     onClick = {
                         game.start()
                         spriteState.start()
@@ -371,20 +373,20 @@ fun App() {
         if (game.status == GameStatus.Over) {
             Column(
                 modifier = Modifier.fillMaxSize()
-                    .background(color = Color.Black.copy(0.4f)),
+                    .background(color = Color.Black.copy(0.5f)),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     "Game Over!",
-                    color = Color.Blue,
+                    color = Color.White,
                     fontSize = MaterialTheme.typography.displayMedium.fontSize,
                     fontWeight = FontWeight.Bold,
                     fontFamily = gameFont()
                 )
                 Text(
                     "Score :${game.currentScore}",
-                    color = Color.Blue,
+                    color = Color.White,
                     fontSize = MaterialTheme.typography.titleLarge.fontSize,
                     fontWeight = FontWeight.Bold,
                     fontFamily = gameFont()
@@ -393,11 +395,14 @@ fun App() {
                 Button(
                     modifier = Modifier.height(54.dp),
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(contentColor = Color.Blue),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.Yellow,
+                        containerColor = Color.Gray.copy(0.5f)
+                    ),
                     onClick = {
                         game.restart()
                         spriteState.start()
-                        scope.launch {  backgroundOffsetX.snapTo(0f)}
+                        scope.launch { backgroundOffsetX.snapTo(0f) }
                     }) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
