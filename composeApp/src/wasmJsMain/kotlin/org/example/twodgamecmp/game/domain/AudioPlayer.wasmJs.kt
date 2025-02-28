@@ -61,7 +61,8 @@ actual class AudioPlayer {
      }
 
     private fun createAudioElement(fileName:String):Audio{
-        val path = "src/commonMain/composeResources/files/$fileName"
+        //val path = "src/commonMain/composeResources/files/$fileName"
+        val path = "composeResources/twoDGameCMP.composeApp.generated.resources/files/$fileName"
         return Audio(path).apply {
             onerror = {_,_,_,_,_ ->
                 println("Error in loading audio file:$path")

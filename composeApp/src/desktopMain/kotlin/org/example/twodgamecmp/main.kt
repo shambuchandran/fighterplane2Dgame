@@ -10,7 +10,7 @@ fun main() = application {
     initializeKoin()
     Window(
         onCloseRequest = ::exitApplication,
-        title = "twoDGameCMP",
+        title = "Mountain Fighter",
         state = WindowState(
             width = 1200.dp,
             height = 800.dp
